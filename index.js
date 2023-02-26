@@ -10,7 +10,6 @@ window.analytics.ready(() => {
     }
     
     // Grab OptanonConsent cookie value
-    // let cookie_OptanonConsent = "isGpcEnabled=0&datestamp=Thu+Feb+09+2023+21:43:52+GMT+0100+(Central+European+Standard+Time)&version=202211.2.0&isIABGlobal=false&hosts=&consentId=75f9f7ca-fd5f-4291-bf93-7811580b43f2&interactionCount=1&landingPath=NotLandingPage&groups=C0001:1,C0002:1,C0003:1,C0004:1,C0005:1&AwaitingReconsent=false&geolocation=US;OR";
     let cookie_OptanonConsent = decodeURIComponent(getCookie("OptanonConsent"));
     
     // Set Default for Strictly Necessary Consent
@@ -30,15 +29,15 @@ window.analytics.ready(() => {
         load: () => Promise.resolve(),
         // context object and reference to the analytics.js instance
         page: (ctx) => {
-            ctx.updateEvent(ctx.event.context['consent']['onetrust'] = consent_onetrust)
+            ctx.updateEvent(ctx.event.context['consent'] = { 'onetrust': consent_onetrust });
             return ctx
         },
         track: (ctx) => {
-            ctx.updateEvent(ctx.event.context['consent']['onetrust'] = consent_onetrust)
+            ctx.updateEvent(ctx.event.context['consent'] = { 'onetrust': consent_onetrust });
             return ctx
         },
         identify: (ctx) => {
-            ctx.updateEvent(ctx.event.context['consent']['onetrust'] = consent_onetrust)
+            ctx.updateEvent(ctx.event.context['consent'] = { 'onetrust': consent_onetrust });
             return ctx
         }
     })
