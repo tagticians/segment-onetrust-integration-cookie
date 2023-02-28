@@ -7,48 +7,63 @@ const INDOMAIN_INSTRUMENTATION_URL = "https://cdn.segment.com/analytics.js/v1/" 
 analytics.load(WEBSITE_WRITE_KEY);
 }}();
 
-window.analytics.ready(() => {
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
+// Add event listeners for OneTrust consent banner
+const ONETRUST_BUTTONS = [document.getElementById("onetrust-accept-btn-handler"), document.getElementById("accept-recommended-btn-handler"), document.querySelector("button.save-preference-btn-handler")];
+ONETRUST_BUTTONS.forEach(button => {
+    if(button != null) {
+        button.addEventListener('click', () => {
+            registerAndCall();
+        });
     }
-    
-    // No Cookie Failsafe
-    let consent_onetrust = "";
-
-    // Grab OptanonConsent cookie value
-    let cookie_OptanonConsent = getCookie("OptanonConsent");
-    if (typeof cookie_OptanonConsent != 'undefined') {
-        cookie_OptanonConsent = decodeURIComponent(cookie_OptanonConsent);
-        // Get 'groups' from OptanonConsent cookie
-        if (cookie_OptanonConsent.indexOf('&groups=') > -1) {
-            consent_onetrust = cookie_OptanonConsent.split('&groups=')[1].split('&')[0];
-        }
-    }
-
-    // Register OneTrust Integration plugin
-    window.analytics.register({
-        name: 'OneTrust Integration Cookie',
-        version: '0.1.0',
-        type: 'enrichment',
-        isLoaded: () => true,
-        load: () => Promise.resolve(),
-        // context object and reference to the analytics.js instance
-        page: (ctx) => {
-            ctx.updateEvent(ctx.event.context['consent'] = { 'onetrust': consent_onetrust });
-            return ctx
-        },
-        track: (ctx) => {
-            ctx.updateEvent(ctx.event.context['consent'] = { 'onetrust': consent_onetrust });
-            return ctx
-        },
-        identify: (ctx) => {
-            ctx.updateEvent(ctx.event.context['consent'] = { 'onetrust': consent_onetrust });
-            return ctx
-        }
-    });
-
-    // Send Pageview
-    analytics.page();
 });
+
+// Call events when analytics.js is loaded
+window.analytics.ready(() => {
+    registerAndCall();
+});
+
+function registerAndCall() {
+     // No Cookie Failsafe
+     let consent_onetrust = "";
+
+     // Grab OptanonConsent cookie value
+     let cookie_OptanonConsent = getCookie("OptanonConsent");
+     if (typeof cookie_OptanonConsent != 'undefined') {
+         cookie_OptanonConsent = decodeURIComponent(cookie_OptanonConsent);
+         // Get 'groups' from OptanonConsent cookie
+         if (cookie_OptanonConsent.indexOf('&groups=') > -1) {
+             consent_onetrust = cookie_OptanonConsent.split('&groups=')[1].split('&')[0];
+         }
+     }
+ 
+     // Register OneTrust Integration plugin
+     window.analytics.register({
+         name: 'OneTrust Integration Cookie',
+         version: '0.1.0',
+         type: 'enrichment',
+         isLoaded: () => true,
+         load: () => Promise.resolve(),
+         // context object and reference to the analytics.js instance
+         page: (ctx) => {
+             ctx.updateEvent(ctx.event.context['consent'] = { 'onetrust': consent_onetrust });
+             return ctx
+         },
+         track: (ctx) => {
+             ctx.updateEvent(ctx.event.context['consent'] = { 'onetrust': consent_onetrust });
+             return ctx
+         },
+         identify: (ctx) => {
+             ctx.updateEvent(ctx.event.context['consent'] = { 'onetrust': consent_onetrust });
+             return ctx
+         }
+     });
+ 
+     // Send Pageview
+     analytics.page();    
+}
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
